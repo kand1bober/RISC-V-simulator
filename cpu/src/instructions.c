@@ -1,4 +1,5 @@
 #include "../include/instructions.h"
+#include "../include/stages.h"
 
 #define EXEC_ERROR   printf("error in execution\n" \
                             " :file: %s\n" \
