@@ -65,8 +65,6 @@ typedef struct
         Operand type;
         int get_arg_func_num;
     } operands[MAX_OPERANDS];
-
-
 } InstructionInfo;
 
 static const InstructionInfo instructions_info[] = 
@@ -91,10 +89,26 @@ static const InstructionInfo instructions_info[] =
     #undef SET_INSTR
 };
 
+
+typedef struct 
+{
+    Register pc_beg;
+    Register pc_end;
+    int sz;
+    DecodedResult* instr_arr;
+} BaseBlock;
+
+typedef struct
+{
+    int arr_sz;
+    BaseBlock** arr;
+} BlockArr;
+
+void advance_pc(CpuState* cpu_state, Register val);
 void fetch(CpuState* cpu_state, BufInfo* input, uint32_t* curr_cmd);
 void decode_instr(Opcode instr_type, uint32_t cmd, DecodedResult* result);
 void decode(CpuState* cpu_state, uint32_t curr_cmd, DecodedResult* result);
-void execute(CpuState* cpu_state, DecodedResult* instruction);
+void execute(CpuState* cpu_state, DecodedResult* instruction, int instr_count);
 void write_to_mem(CpuState* cpu_state, Register addr, Register val);
 Register read_from_mem(CpuState* cpu_state, Register addr);
 

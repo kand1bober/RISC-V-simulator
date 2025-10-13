@@ -24,7 +24,7 @@ $(EXECUTABLE): $(OBJ)
 	$(CC) -c $(CFLAGS) -Icpu/include -Iutilities $< $@ 
 	
 delete:
-	@rm -f cpu/src/main.o cpu/src/instructions.o cpu/src/stages.o 
+	@rm -f cpu/src/main.o cpu/src/instructions.o cpu/src/stages.o cpu/src/arr_work.o 
 	@rm -f utilities/file_work.o
 
 clean: 

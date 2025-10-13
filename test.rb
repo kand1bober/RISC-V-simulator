@@ -5,6 +5,11 @@ init_cmd("common/cmd_bin.txt")
 
 add x1, x2, x3
 sub x1, x2 ,x3
+
+beq x2, x3, 0
+
+add x1, x2, x3
+sub x1, x2 ,x3
 #------------------------
 
 close_cmd

@@ -1,17 +1,23 @@
 #include "../include/include.h"
 
+
+void advance_pc(CpuState* cpu_state, Register val)
+{
+    cpu_state->pc += val;
+}
+
+
 void fetch(CpuState* cpu_state, BufInfo* code, uint32_t* curr_cmd)
 {
     if ((cpu_state->pc + CMD_SIZE - 1) >= code->sz) 
     {
-        cpu_state->status = kInputEnd;
+        cpu_state->cpu_status = kInputEnd;
         return;
     }
 
     memcpy(curr_cmd, code->buf + cpu_state->pc, CMD_SIZE);
-    cpu_state->pc += CMD_SIZE;
 
-    cpu_state->status = kGood; 
+    cpu_state->cpu_status = kGood; 
 }
 
 
@@ -129,48 +135,52 @@ void decode(CpuState* cpu_state, uint32_t curr_cmd, DecodedResult* result)
 
         default: {break;}
     }
-
 }
 
 
 #define OP(num, sz) instr->operands[num].val.i##sz
-void execute(CpuState* cpu_state, DecodedResult* instr)
+void execute(CpuState* cpu_state, DecodedResult* instr, int instr_count)
 {
-    switch (instr->opcode)
+    for (int i = 0; i < instr_count; i++)
     {
-        EXECUTE_CASE(kAdd, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8))
+        switch (instr->opcode)
+        {
+            EXECUTE_CASE(kAdd, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8))
 
-        EXECUTE_CASE(kSub, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8))
+            EXECUTE_CASE(kSub, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8))
 
-        EXECUTE_CASE(kOr, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8))
+            EXECUTE_CASE(kOr, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8))
 
-        EXECUTE_CASE(kBext, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8))
+            EXECUTE_CASE(kBext, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8))
 
-        EXECUTE_CASE(kSyscall, cpu_state)
+            EXECUTE_CASE(kSyscall, cpu_state)
 
-        EXECUTE_CASE(kClz, cpu_state, OP(0, 8), OP(1, 8))
+            EXECUTE_CASE(kClz, cpu_state, OP(0, 8), OP(1, 8))
 
-        EXECUTE_CASE(kSlti, cpu_state, OP(0, 8), OP(1, 8), OP(2, 16))
+            EXECUTE_CASE(kSlti, cpu_state, OP(0, 8), OP(1, 8), OP(2, 16))
 
-        EXECUTE_CASE(kSt, cpu_state, OP(0, 8), OP(1, 8), OP(2, 16))
+            EXECUTE_CASE(kSt, cpu_state, OP(0, 8), OP(1, 8), OP(2, 16))
 
-        EXECUTE_CASE(kSsat, cpu_state, OP(0, 8), OP(1, 8), OP(0, 8))
+            EXECUTE_CASE(kSsat, cpu_state, OP(0, 8), OP(1, 8), OP(0, 8))
 
-        EXECUTE_CASE(kLdp, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8), OP(3, 16))
+            EXECUTE_CASE(kLdp, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8), OP(3, 16))
 
-        EXECUTE_CASE(kBeq, cpu_state, OP(0, 8), OP(1, 8), OP(2, 16))
+            EXECUTE_CASE(kBeq, cpu_state, OP(0, 8), OP(1, 8), OP(2, 16))
 
-        EXECUTE_CASE(kLd, cpu_state, OP(0, 8), OP(1, 8), OP(2, 16))
+            EXECUTE_CASE(kLd, cpu_state, OP(0, 8), OP(1, 8), OP(2, 16))
 
-        EXECUTE_CASE(kJ, cpu_state, OP(0, 32))
+            EXECUTE_CASE(kJ, cpu_state, OP(0, 32))
 
-        EXECUTE_CASE(kUsat, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8))
+            EXECUTE_CASE(kUsat, cpu_state, OP(0, 8), OP(1, 8), OP(2, 8))
 
-        default: {break;}
+            default: {break;}
+        }
+        
+        advance_pc(cpu_state, CMD_SIZE);
+    
+        DEB(CPU_DUMP(cpu_state))    
+        DEB(MEM_DUMP)
     }
-
-    DEB(CPU_DUMP(cpu_state))    
-    DEB(MEM_DUMP)
 }
 #undef OP
 

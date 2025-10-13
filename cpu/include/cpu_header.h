@@ -10,7 +10,7 @@
 #define CPU_HEADER
 
 
-    // #define DEBUG
+    #define DEBUG
 #ifdef DEBUG
     #define DEB(expr) expr
 #else 
@@ -22,8 +22,15 @@ typedef enum
 {
     kGood,
     kInputEnd,
+    kBaseBlockFound,
+    kBaseBlockNotFound,
 } CpuInfo;
 
+typedef enum 
+{
+    kBuilding,
+    kNotBuilding,
+} BlockInfo;
 
 typedef struct
 {   
@@ -39,7 +46,8 @@ typedef int32_t Register;
 
 typedef struct
 {   
-    CpuInfo status;
+    CpuInfo cpu_status;
+    BlockInfo block_status;
     Register gpr_regs[kNumRegs];
     Register pc;
     Memory memory;

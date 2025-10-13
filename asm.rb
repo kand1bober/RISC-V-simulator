@@ -108,7 +108,6 @@ def method_missing(method, *args)
                 
                 #forward jump
                 if saved_counter != Cmd::HASH_NOT_FOUND
-
                     #TODO: вынести логику патчинга файла в метод класса     
                     cur_pos = Cmd.file.pos #save pos in file
                     # puts("cur_pos: #{cur_pos}")
