@@ -17,6 +17,9 @@ void do_kAdd(CpuState* cpu_state, uint8_t rd, uint8_t rs, uint8_t rt)
 {
     Register* regs = cpu_state->gpr_regs;
     regs[rd] = regs[rs] + regs[rt];
+
+    // printf("%d %d %d\n", rd, rs, rt);
+    // printf("ADD: %d\n", regs[rd]);
 }
 
 

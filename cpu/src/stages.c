@@ -15,63 +15,76 @@ void fetch(CpuState* cpu_state, BufInfo* code, uint32_t* curr_cmd)
 }
 
 
-// void decode_exec(CpuState* cpu_state, uint32_t curr_cmd)
-// {
-//     DEB(CMD_DUMP(curr_cmd))
-//     DEB(CPU_DUMP(cpu_state))    
-//     DEB(MEM_DUMP)
+void decode_instr(Opcode instr_type, uint32_t cmd, DecodedResult* result)
+{ 
+    InstructionInfo proto; 
+    for (int i = 0; i < sizeof(instructions_info) / sizeof(InstructionInfo); i++) 
+    { 
+        if (instructions_info[i].opcode == instr_type) 
+        {   
+            proto = instructions_info[i]; 
+            break;
+        } 
+    } 
 
-//     switch (GET_TYPE(curr_cmd))
-//     {
-//         case 0:
-//         {
-//             switch(GET_FUNC(curr_cmd))
-//             {
-//                 CMD_CASE(kAdd, cpu_state, GET_ARG_3(curr_cmd), GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd))
+    result->num_operands = proto.num_operands; 
+    for (int i = 0; i < proto.num_operands; i++) 
+    { 
+        Operand op_type = proto.operands[i].type; 
+        result->operands[i].type = op_type; 
+        switch (op_type) 
+        { 
+            case(kArg5): 
+            { 
+                switch (proto.operands[i].get_arg_func_num) 
+                { 
+                    case 1:
+                    { 
+                        result->operands[i].val.i8 = GET_ARG_1(cmd); 
+                        break; 
+                    } 
+                    case 2: 
+                    { 
+                        result->operands[i].val.i8 = GET_ARG_2(cmd); 
+                        break; 
+                    } 
+                    case 3: 
+                    { 
+                        result->operands[i].val.i8 = GET_ARG_3(cmd); 
+                        break; 
+                    } 
+                    default: 
+                    { 
+                       break; 
+                    } 
+                }
 
-//                 CMD_CASE(kSub, cpu_state, GET_ARG_3(curr_cmd), GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd))
-
-//                 CMD_CASE(kOr, cpu_state, GET_ARG_3(curr_cmd), GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd))
-
-//                 CMD_CASE(kBext, cpu_state, GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd), GET_ARG_3(curr_cmd))
-
-//                 CMD_CASE(kSyscall, cpu_state)
-
-//                 CMD_CASE(kClz, cpu_state, GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd))
-
-//                 default:{
-//                     break;
-//                 } 
-//             }
-
-//             break;
-//         }
-
-//         CMD_CASE(kSlti, cpu_state, GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd), GET_LAST_16(curr_cmd))
-
-//         CMD_CASE(kSt, cpu_state, GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd), GET_LAST_16(curr_cmd))
-
-//         CMD_CASE(kSsat, cpu_state, GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd), GET_ARG_3(curr_cmd))
-
-//         CMD_CASE(kLdp, cpu_state, GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd), GET_ARG_3(curr_cmd), GET_LAST_11(curr_cmd))
-
-//         CMD_CASE(kBeq, cpu_state, GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd), GET_LAST_16(curr_cmd))
-
-//         CMD_CASE(kLd, cpu_state, GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd), GET_LAST_16(curr_cmd))
-
-//         CMD_CASE(kJ, cpu_state, GET_LAST_26(curr_cmd))
-
-//         CMD_CASE(kUsat, cpu_state, GET_ARG_1(curr_cmd), GET_ARG_2(curr_cmd), GET_ARG_3(curr_cmd))
-
-//         default:{
-//             break;
-//         }
-//     }
-
-//     DEB(CMD_DUMP(curr_cmd))
-//     DEB(CPU_DUMP(cpu_state))    
-//     DEB(MEM_DUMP)
-// }
+                break; 
+            }
+            case (kArg11):
+            {
+                result->operands[i].val.i16 = GET_LAST_11(cmd); 
+                break; 
+            }
+            case (kArg16): 
+            { 
+                result->operands[i].val.i16 = GET_LAST_16(cmd); 
+                break; 
+            } 
+            case (kArg20): { break; } //syscall, no arguments
+            case (kArg26): 
+            { 
+                result->operands[i].val.i32 = GET_LAST_26(cmd); 
+                break; 
+            } 
+            default: 
+            { 
+                printf("incorrect type\n"); 
+                exit(0);
+            } 
+        } 
+    } 
+} 
 
 
 void decode(CpuState* cpu_state, uint32_t curr_cmd, DecodedResult* result)
@@ -101,6 +114,8 @@ void decode(CpuState* cpu_state, uint32_t curr_cmd, DecodedResult* result)
                 
                 default: {break;} 
             }
+
+            break;
         }
 
         DECODE_CASE(kSlti, curr_cmd)

@@ -4,28 +4,6 @@
 #ifndef STAGES_HEADER
 #define STAGES_HEADER
 
-#define MAX_OPERANDS 4
-
-#define TYPE_MASK 0b0111111 //6 bits == 1
-#define TYPE_SHIFT 26 
-#define GET_TYPE(cmd) (((cmd) >> TYPE_SHIFT) & TYPE_MASK) 
-
-#define OPERAND_MASK 31 //5 bits == 1 
-#define ARG_1_SHIFT 21 
-#define ARG_2_SHIFT 16 
-#define ARG_3_SHIFT 11
-#define GET_ARG_1(cmd) (((cmd) >> ARG_1_SHIFT) & OPERAND_MASK)  
-#define GET_ARG_2(cmd) (((cmd) >> ARG_2_SHIFT) & OPERAND_MASK)  
-#define GET_ARG_3(cmd) (((cmd) >> ARG_3_SHIFT) & OPERAND_MASK)  
-
-#define GET_LAST_11(cmd) ((cmd) & 2047) //11 bits == 1
-#define GET_LAST_16(cmd) ((cmd) & 65535) //16 bits == 1  
-#define GET_LAST_26(cmd) ((cmd) & 67108863) //26 bits == 1
-
-//for R-type
-#define FUNC_MASK 31 //5 bits == 1
-#define GET_FUNC(cmd) ((cmd) & FUNC_MASK)
-
 typedef enum
 {   
     //R-type (reg-reg)
@@ -54,8 +32,8 @@ typedef enum
     kArg5,
     kArg11,
     kArg16,
-    kArg25,  
-    kArg25, 
+    kArg20, //special for syscall  
+    kArg26, 
 } Operand;
 
 
@@ -99,13 +77,22 @@ static const InstructionInfo instructions_info[] =
     SET_INSTR(kSub,     3, {kArg5, 3}, {kArg5, 1}, {kArg5, 2})
     SET_INSTR(kOr,      3, {kArg5, 3}, {kArg5, 1}, {kArg5, 2})
     SET_INSTR(kBext,    3, {kArg5, 3}, {kArg5, 1}, {kArg5, 2})
-
-    SET_INSTR(kSyscall, 1, {kArg, 3}, {kArg5, 1}, {kArg5, 2})
+    SET_INSTR(kClz,     2, {kArg5, 1}, {kArg5, 2})
+    SET_INSTR(kSyscall, 0, {kArg20})
+    SET_INSTR(kSlti,    3, {kArg5, 1}, {kArg5, 2}, {kArg16})
+    SET_INSTR(kSt,      3, {kArg5, 1}, {kArg5, 2}, {kArg16})
+    SET_INSTR(kSsat,    3, {kArg5, 1}, {kArg5, 2}, {kArg5, 3})
+    SET_INSTR(kLdp,     4, {kArg5, 1}, {kArg5, 2}, {kArg5, 3}, {kArg11})
+    SET_INSTR(kBeq,     3, {kArg5, 1}, {kArg5, 2}, {kArg16})
+    SET_INSTR(kLd,      3, {kArg5, 1}, {kArg5, 2}, {kArg16})
+    SET_INSTR(kJ,       1, {kArg26})
+    SET_INSTR(kUsat,    3, {kArg5, 1}, {kArg5, 2}, {kArg5, 3})
 
     #undef SET_INSTR
 };
 
 void fetch(CpuState* cpu_state, BufInfo* input, uint32_t* curr_cmd);
+void decode_instr(Opcode instr_type, uint32_t cmd, DecodedResult* result);
 void decode(CpuState* cpu_state, uint32_t curr_cmd, DecodedResult* result);
 void execute(CpuState* cpu_state, DecodedResult* instruction);
 void write_to_mem(CpuState* cpu_state, Register addr, Register val);

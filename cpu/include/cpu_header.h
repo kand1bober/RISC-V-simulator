@@ -10,7 +10,7 @@
 #define CPU_HEADER
 
 
-    #define DEBUG
+    // #define DEBUG
 #ifdef DEBUG
     #define DEB(expr) expr
 #else 

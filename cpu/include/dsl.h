@@ -3,133 +3,27 @@
 #ifndef DSL_HEADER
 #define DSL_HEADER
 
+#define MAX_OPERANDS 4
 
-#define DECODE(instr_type, cmd) \
-{ \
-    InstructionInfo proto; \
-    for (int i = 0; i < sizeof(instructions_info) / sizeof(InstructionInfo); i++) \
-    { \
-        if (instructions_info[i].opcode == instr_type) \
-        { \
-            proto = instructions_info[i]; \
-        } \
-        else \
-            continue; \
-    } \
-    \
-    result->num_operands = proto.num_operands; \
-    for (int i = 0; i < proto.num_operands; i++) \
-    { \
-        Operand op_type = proto.operands[i].type; \
-        result->operands[i].type = op_type; \
-        switch (op_type) \
-        { \
-            case(kArg5): \
-            { \
-                switch (proto.operands[i].get_arg_func_num) \
-                { \
-                    case 1: \
-                    { \
-                        result->operands[i].val.i8 = GET_ARG_1(cmd); \
-                        break; \
-                    } \
-                    case 2: \
-                    { \
-                        result->operands[i].val.i8 = GET_ARG_2(cmd); \
-                        break; \
-                    } \
-                    case 3: \
-                    { \
-                        result->operands[i].val.i8 = GET_ARG_3(cmd); \
-                        break; \
-                    } \
-                    default: \
-                    { \
-                       break; \
-                    } \
-                } \
-            }\
-            case (kArg11): \
-            case (kArg16): \
-            { \
-                break; \
-            } \
-            case (kArg25): \
-            { \
-                break; \
-            } \
-            default: \
-            { \
-                printf("incorrect type\n"); \
-                exit(0);\
-            } \
-        } \
-    } \
-} \
+#define TYPE_MASK 0b0111111 //6 bits == 1
+#define TYPE_SHIFT 26 
+#define GET_TYPE(cmd) (((cmd) >> TYPE_SHIFT) & TYPE_MASK) 
 
+#define OPERAND_MASK 31 //5 bits == 1 
+#define ARG_1_SHIFT 21 
+#define ARG_2_SHIFT 16 
+#define ARG_3_SHIFT 11
+#define GET_ARG_1(cmd) (((cmd) >> ARG_1_SHIFT) & OPERAND_MASK)  
+#define GET_ARG_2(cmd) (((cmd) >> ARG_2_SHIFT) & OPERAND_MASK)  
+#define GET_ARG_3(cmd) (((cmd) >> ARG_3_SHIFT) & OPERAND_MASK)  
 
-void decode_instr(Opcode instr_type, uint32_t cmd, DecodedResult* result)
-{ 
-    InstructionInfo proto; 
-    for (int i = 0; i < sizeof(instructions_info) / sizeof(InstructionInfo); i++) 
-    { 
-        if (instructions_info[i].opcode == instr_type) 
-        { 
-            proto = instructions_info[i]; 
-        } 
-        else 
-            continue; 
-    } 
-    
-    result->num_operands = proto.num_operands; 
-    for (int i = 0; i < proto.num_operands; i++) 
-    { 
-        Operand op_type = proto.operands[i].type; 
-        result->operands[i].type = op_type; 
-        switch (op_type) 
-        { 
-            case(kArg5): 
-            { 
-                switch (proto.operands[i].get_arg_func_num) 
-                { 
-                    case 1:
-                    { 
-                        result->operands[i].val.i8 = GET_ARG_1(cmd); 
-                        break; 
-                    } 
-                    case 2: 
-                    { 
-                        result->operands[i].val.i8 = GET_ARG_2(cmd); 
-                        break; 
-                    } 
-                    case 3: 
-                    { 
-                        result->operands[i].val.i8 = GET_ARG_3(cmd); 
-                        break; 
-                    } 
-                    default: 
-                    { 
-                       break; 
-                    } 
-                } 
-            }
-            case (kArg11):
-            case (kArg16): 
-            { 
-                break; 
-            } 
-            case (kArg25): 
-            { 
-                break; 
-            } 
-            default: 
-            { 
-                printf("incorrect type\n"); 
-                exit(0);
-            } 
-        } 
-    } 
-} 
+#define GET_LAST_11(cmd) ((cmd) & 2047) //11 bits == 1
+#define GET_LAST_16(cmd) ((cmd) & 65535) //16 bits == 1  
+#define GET_LAST_26(cmd) ((cmd) & 67108863) //26 bits == 1
+
+//for R-type
+#define FUNC_MASK 31 //5 bits == 1
+#define GET_FUNC(cmd) ((cmd) & FUNC_MASK)
 
 
 #define DECODE_CASE(instr_type, cmd) \

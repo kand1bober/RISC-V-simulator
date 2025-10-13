@@ -16,8 +16,8 @@ int main()
         cpu_state.gpr_regs[i] = 0;
 
     //===== TEST ======
-    cpu_state.gpr_regs[2] = 7;
-    cpu_state.gpr_regs[3] = 8;
+    // cpu_state.gpr_regs[2] = 7;
+    // cpu_state.gpr_regs[3] = 8;
     //=================
 
     DecodedResult instr;
